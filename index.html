@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RarePear by ShayBlbn</title>
+  <meta name="description" content="RarePear by ShayBlbn - A unique digital pear experience. Explore pears, Shay, Rare Pear, and more.">
+  <meta name="keywords" content="Shay, ShayBlbn, RarePear, Pear, rare, fruit, art, digital pear, unique site, pear rain, كمثرى, موقع Shay">
+  <meta name="author" content="ShayBlbn">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="RarePear by ShayBlbn" />
+  <meta property="og:description" content="A unique pear-themed creation by ShayBlbn." />
+  <meta property="og:image" content="https://em-content.zobj.net/source/apple/391/pear_1f350.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RarePear by ShayBlbn" />
+  <meta name="twitter:description" content="Discover the RarePear and digital pear rain by ShayBlbn." />
 
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #e8ffe3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 4em;
+      margin: 0;
+      z-index: 2;
+    }
+
+    .pear {
+      font-size: 5em;
+      animation: float 2s infinite ease-in-out;
+    }
+
+    .rain {
+      position: absolute;
+      top: -50px;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .raindrop {
+      position: absolute;
+      top: -50px;
+      font-size: 2em;
+      animation: drop linear infinite;
+      color: #56ab2f;
+    }
+
+    @keyframes drop {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 1em;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="rain">
+    <!-- Generate multiple pears as raindrops -->
+    <!-- You can increase or reduce the number of drops as needed -->
+    <script>
+      for (let i = 0; i < 50; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'raindrop';
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = 2 + Math.random() * 3 + 's';
+        drop.style.fontSize = (Math.random() * 1.5 + 1) + 'em';
+        drop.textContent = '🍐';
+        document.querySelector('.rain').appendChild(drop);
+      }
+    </script>
+  </div>
+
+  <h1>RarePear</h1>
+  <div class="pear">🍐</div>
+
+  <div class="footer">by ShayBlbn</div>
+</body>
+</html>
