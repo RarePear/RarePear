@@ -2,112 +2,951 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Pear Runner Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RarePear by ShayBlbn</title>
-  <meta name="description" content="RarePear by ShayBlbn - A unique digital pear experience. Explore pears, Shay, Rare Pear, and more.">
-  <meta name="keywords" content="Shay, ShayBlbn, RarePear, Pear, rare, fruit, art, digital pear, unique site, pear rain, كمثرى, موقع Shay">
-  <meta name="author" content="ShayBlbn">
-  <meta name="robots" content="index, follow">
-  <meta property="og:title" content="RarePear by ShayBlbn" />
-  <meta property="og:description" content="A unique pear-themed creation by ShayBlbn." />
-  <meta property="og:image" content="https://em-content.zobj.net/source/apple/391/pear_1f350.png" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="RarePear by ShayBlbn" />
-  <meta name="twitter:description" content="Discover the RarePear and digital pear rain by ShayBlbn." />
-
   <style>
-    body {
+    /* Base styles and reset */
+    html, body {
       margin: 0;
-      height: 100vh;
+      padding: 0;
+      overflow: hidden;
       background: #e8ffe3;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    body {
       position: relative;
+      background: linear-gradient(to top, #e8ffe3 80%, #b0e57c 100%);
+      width: 100vw; height: 100vh;
     }
-
-    h1 {
-      font-size: 4em;
-      margin: 0;
-      z-index: 2;
-    }
-
-    .pear {
-      font-size: 5em;
-      animation: float 2s infinite ease-in-out;
-    }
-
-    .rain {
+    #game-container {
       position: absolute;
-      top: -50px;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 95vw; max-width: 700px;
+      height: 70vh; max-height: 400px;
+      background: #d6f7c1;
+      border-radius: 24px;
+      box-shadow: 0 6px 32px 0 rgba(48,80,24,0.10);
       overflow: hidden;
-      z-index: 1;
     }
-
-    .raindrop {
-      position: absolute;
-      top: -50px;
-      font-size: 2em;
-      animation: drop linear infinite;
-      color: #56ab2f;
+    canvas {
+      display: block;
+      width: 100%; height: 100%;
+      background: transparent;
     }
-
-    @keyframes drop {
-      0% {
-        transform: translateY(-100px) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(120vh) rotate(360deg);
-        opacity: 0;
-      }
+    /* UI overlays */
+    .ui, .customization, .restart-screen {
+      position: absolute; left: 50%; z-index: 10;
+      transform: translateX(-50%);
+      width: 100%; pointer-events: none;
+      color: #222;
+      text-align: center;
+      font-size: 1.15em;
     }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
+    .ui {
+      top: 0; padding: 10px 0;
+      display: flex; justify-content: space-between;
+      width: 97%;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-weight: 500;
+      text-shadow: 0 2px 6px #fff8;
+      pointer-events: none;
+      user-select: none;
     }
-
-    .footer {
-      position: absolute;
-      bottom: 10px;
+    .customization {
+      top: 50%; left: 50%;
+      transform: translate(-50%, -60%);
+      background: rgba(255,255,255,0.94);
+      border-radius: 16px;
+      box-shadow: 0 6px 16px 0 rgba(48,80,24,0.12);
+      padding: 24px 18px;
+      width: 320px; max-width: 95vw;
+      pointer-events: auto;
+      display: flex; flex-direction: column; align-items: center;
+      animation: fadeIn 0.7s;
+    }
+    .customization label, .customization select {
+      font-size: 1em; font-weight: 500;
+      margin: 10px 0 4px 0; display: block;
+    }
+    .customization input[type="color"], .customization select {
+      margin-bottom: 10px;
+    }
+    .customization .pear-preview {
+      margin: 16px 0;
+    }
+    .customization button {
+      padding: 8px 24px;
+      background: #56ab2f;
+      color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 1.1em; font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 2px 6px #2222;
+      transition: background 0.2s;
+      pointer-events: auto;
+    }
+    .customization button:hover {
+      background: #389f1d;
+    }
+    .restart-screen {
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.96);
+      border-radius: 18px;
+      padding: 28px 18px;
+      width: 320px; max-width: 95vw;
+      display: flex; flex-direction: column; align-items: center;
+      animation: fadeIn 0.7s;
+      pointer-events: auto;
+    }
+    .restart-screen button {
+      margin-top: 14px;
+      padding: 8px 32px;
+      background: #56ab2f;
+      color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 1.1em; font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px #2222;
+      pointer-events: auto;
+    }
+    .restart-screen button:hover {
+      background: #389f1d;
+    }
+    .restart-screen .stats {
       font-size: 1em;
-      color: #333;
+      margin: 10px 0 0 0;
+      width: 100%; text-align: left;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translate(-50%, 0%);}
+      100% { opacity: 1; transform: translate(-50%, -60%);}
+    }
+    /* Responsive */
+    @media (max-width: 650px) {
+      #game-container { max-width: 99vw; }
+      .customization, .restart-screen { width: 97vw; }
     }
   </style>
 </head>
 <body>
-  <div class="rain">
-    <!-- Generate multiple pears as raindrops -->
-    <!-- You can increase or reduce the number of drops as needed -->
-    <script>
-      for (let i = 0; i < 50; i++) {
-        const drop = document.createElement('div');
-        drop.className = 'raindrop';
-        drop.style.left = Math.random() * 100 + 'vw';
-        drop.style.animationDuration = 2 + Math.random() * 3 + 's';
-        drop.style.fontSize = (Math.random() * 1.5 + 1) + 'em';
-        drop.textContent = '🍐';
-        document.querySelector('.rain').appendChild(drop);
-      }
-    </script>
+  <div id="game-container">
+    <canvas id="game"></canvas>
+    <!-- UI overlays -->
+    <div class="ui" id="ui-overlay" style="display:none;">
+      <span id="score">Score: 0</span>
+      <span id="highscore">High: 0</span>
+      <span id="stats">Jumps: 0 | Avoided: 0 | Rewards: 0</span>
+    </div>
+    <!-- Customization Panel -->
+    <form class="customization" id="custom-panel">
+      <div style="font-size:1.7em; font-weight:600;">Customize Your Pear</div>
+      <label for="pearColor">Pear Color</label>
+      <input type="color" id="pearColor" value="#8ddf48"/>
+      <label for="leafColor">Leaf Color</label>
+      <input type="color" id="leafColor" value="#46a346"/>
+      <label for="pearShape">Shape</label>
+      <select id="pearShape">
+        <option value="classic">Classic</option>
+        <option value="round">Round</option>
+        <option value="tall">Tall</option>
+        <option value="mini">Mini</option>
+      </select>
+      <div class="pear-preview" id="pearPreview"></div>
+      <button type="submit">Start Game</button>
+    </form>
+    <!-- Restart Screen -->
+    <div class="restart-screen" id="restart-screen" style="display:none;">
+      <div style="font-size:1.7em; font-weight:600;">Game Over!</div>
+      <div id="final-score" style="font-size:1.2em; margin:8px 0;"></div>
+      <div class="stats" id="final-stats"></div>
+      <button id="restart-btn">Restart</button>
+    </div>
   </div>
+  <script>
+    // ====== GAME CONSTANTS ======
+    const GAME_W = 700, GAME_H = 380; // logical canvas size
+    const GROUND_Y = GAME_H - 60;
+    const PEAR_W = 48, PEAR_H = 62; // base pear size
+    const OBSTACLE_MIN_GAP = 110, OBSTACLE_MAX_GAP = 240;
+    const OBSTACLE_TYPES = [
+      {w:32, h:40, yoff:0, color:'#b3b948', speed:1, name:'rock'},
+      {w:30, h:60, yoff:0, color:'#a7582f', speed:1.2, name:'log'},
+      {w:24, h:32, yoff:-18, color:'#a3e85a', speed:1.1, name:'bush'},
+      {w:36, h:28, yoff:12, color:'#6bc9a7', speed:1.0, name:'puddle'},
+      {w:32, h:46, yoff:-6, color:'#e3c55a', speed:1.3, name:'crate'}
+    ];
+    const REWARDS = [
+      {type:'star', color:'#ffd700', effect:'invincible'},
+      {type:'cherry', color:'#bc2e2e', effect:'speed'},
+      {type:'blueberry', color:'#4b70dd', effect:'score'}
+    ];
+    const INITIAL_SPEED = 5;
+    const GRAVITY = 0.7, JUMP_VEL = -13.5;
+    const SLIDE_TIME = 620; // ms
+    const REWARD_SIZE = 28;
+    const INVINCIBLE_TIME = 2700;
+    const SPEEDBOOST_TIME = 2000;
 
-  <h1>RarePear</h1>
-  <div class="pear">🍐</div>
+    // ====== GAME STATE ======
+    let canvas = document.getElementById('game');
+    let ctx = canvas.getContext('2d');
+    let dpr = window.devicePixelRatio || 1;
+    let width, height, scale;
 
-  <div class="footer">by ShayBlbn</div>
+    // Pear Customization
+    let pearCustom = {
+      color: '#8ddf48',
+      leaf: '#46a346',
+      shape: 'classic'
+    };
+
+    function drawPearPreview(elem, custom = pearCustom) {
+      // Draw a pear preview using inline SVG (for the customization panel)
+      let svg = `<svg width="60" height="70" viewBox="0 0 60 70">
+        <ellipse cx="30" cy="${custom.shape==='tall'?45:50}" rx="${custom.shape==='round'?20:15}" ry="${custom.shape==='tall'?28:20}" fill="${custom.color}"/>
+        <ellipse cx="30" cy="30" rx="${custom.shape==='round'?12:9}" ry="${custom.shape==='tall'?17:13}" fill="${custom.color}" />
+        <ellipse cx="36" cy="19" rx="7" ry="3.5" fill="${custom.leaf}" transform="rotate(-22 36 19)" />
+        <rect x="28" y="8" width="4" height="14" rx="2" fill="#b58d5b"/>
+        <ellipse cx="30" cy="18" rx="2.4" ry="1.2" fill="#fff" opacity="0.35"/>
+      </svg>`;
+      elem.innerHTML = svg;
+    }
+
+    // Responsive canvas
+    function resizeCanvas() {
+      let container = document.getElementById('game-container');
+      let w = container.clientWidth, h = container.clientHeight;
+      scale = Math.min(w/GAME_W,h/GAME_H);
+      width = GAME_W * scale;
+      height = GAME_H * scale;
+      canvas.width = GAME_W * dpr;
+      canvas.height = GAME_H * dpr;
+      canvas.style.width = width+'px';
+      canvas.style.height = height+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // ====== GAME OBJECTS =======
+    class Pear {
+      constructor(custom) {
+        this.x = 80; // left X
+        this.y = GROUND_Y - PEAR_H; // top Y
+        this.dy = 0;
+        this.w = PEAR_W;
+        this.h = PEAR_H;
+        this.grounded = true;
+        this.sliding = false;
+        this.slideTimer = 0;
+        this.jumping = false;
+        this.stats = {jumps:0, avoided:0, collected:0};
+        this.invincible = 0;
+        this.speedBoost = 0;
+        this.custom = {...custom}; // color, leaf, shape
+      }
+      jump() {
+        if (this.grounded && !this.sliding) {
+          this.dy = JUMP_VEL;
+          this.grounded = false;
+          this.jumping = true;
+          this.stats.jumps++;
+        }
+      }
+      slide() {
+        if (!this.sliding && this.grounded) {
+          this.sliding = true;
+          this.slideTimer = SLIDE_TIME;
+        }
+      }
+      update(dt) {
+        if (!this.grounded) {
+          this.dy += GRAVITY;
+          this.y += this.dy;
+          if (this.y >= GROUND_Y - this.h) {
+            this.y = GROUND_Y - this.h;
+            this.dy = 0;
+            this.grounded = true;
+            this.jumping = false;
+          }
+        }
+        if (this.sliding) {
+          this.slideTimer -= dt;
+          if (this.slideTimer <= 0) {
+            this.sliding = false;
+          }
+        }
+        if (this.invincible > 0) this.invincible -= dt;
+        if (this.speedBoost > 0) this.speedBoost -= dt;
+      }
+      get rect() {
+        // Return collision box (shrunk when sliding)
+        let h = this.sliding ? this.h * 0.52 : this.h;
+        return {x:this.x+6, y:this.y+(this.h-h), w:this.w-12, h:h-6};
+      }
+      draw(ctx, t) {
+        // Draw the pear using only canvas and current customization
+        ctx.save();
+        ctx.translate(this.x+this.w/2, this.y+this.h/2);
+
+        // Animation: a little squash when sliding, a bounce when running
+        let squash = this.sliding ? 0.78 : (this.jumping ? 0.98 : 1 + Math.sin(t/95)*0.03);
+        let stretch = this.sliding ? 1.14 : (this.jumping ? 1.02 : 1);
+        ctx.scale(stretch, squash);
+
+        // Shadow
+        ctx.save();
+        ctx.scale(1.2,0.28);
+        ctx.beginPath();
+        ctx.arc(0, (this.h/1.9), this.w/2.5, 0, 2*Math.PI);
+        ctx.globalAlpha = 0.24;
+        ctx.fillStyle = '#222';
+        ctx.fill();
+        ctx.restore();
+
+        // Pear body
+        ctx.beginPath();
+        let shape = this.custom.shape;
+        if (shape==='round') {
+          ctx.ellipse(0,8, 22, 29, 0, 0, 2*Math.PI);
+          ctx.ellipse(0,-12,14,19,0,0,2*Math.PI);
+        } else if (shape==='tall') {
+          ctx.ellipse(0,4, 16, 32, 0, 0, 2*Math.PI);
+          ctx.ellipse(0,-16,9,19,0,0,2*Math.PI);
+        } else if (shape==='mini') {
+          ctx.ellipse(0,15, 12, 19, 0, 0, 2*Math.PI);
+          ctx.ellipse(0,-3,8,12,0,0,2*Math.PI);
+        } else { // classic
+          ctx.ellipse(0,12, 15, 26, 0, 0, 2*Math.PI);
+          ctx.ellipse(0,-8,10,16,0,0,2*Math.PI);
+        }
+        ctx.fillStyle = this.invincible>0 ? "#fff170" : this.custom.color;
+        ctx.shadowColor = "#bbb"; ctx.shadowBlur = 5;
+        ctx.fill(); ctx.shadowBlur = 0;
+
+        // Pear shine
+        ctx.beginPath();
+        ctx.ellipse(-6,-8, 4, 8, -0.2, 0, Math.PI*2);
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        // Pear leaf
+        ctx.save();
+        ctx.rotate(-0.34);
+        ctx.beginPath();
+        ctx.ellipse(15, -26, 6, 13, 0.6, 0, 2 * Math.PI);
+        ctx.fillStyle = this.custom.leaf;
+        ctx.shadowColor = "#74b765"; ctx.shadowBlur = 2;
+        ctx.fill();
+        ctx.restore();
+
+        // Pear stem
+        ctx.save();
+        ctx.strokeStyle = "#b58d5b"; ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0,-34); ctx.lineTo(0,-18);
+        ctx.stroke();
+        ctx.restore();
+
+        // Face
+        ctx.save();
+        ctx.translate(0, 6);
+        // Eyes
+        ctx.beginPath();
+        ctx.arc(-6,-6, 2, 0, Math.PI*2);
+        ctx.arc(6,-6, 2, 0, Math.PI*2);
+        ctx.fillStyle = "#222";
+        ctx.fill();
+        // Smile
+        ctx.beginPath();
+        ctx.arc(0,0,7,0.13,Math.PI-0.13);
+        ctx.strokeStyle = "#444"; ctx.lineWidth = 1.3;
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+    }
+
+    class Obstacle {
+      constructor(type, speed) {
+        this.type = type;
+        this.x = GAME_W + 10;
+        this.y = GROUND_Y - type.h + type.yoff;
+        this.w = type.w;
+        this.h = type.h;
+        this.color = type.color;
+        this.speed = speed * type.speed * (0.94+Math.random()*0.13);
+        this.passed = false;
+      }
+      update(dt, gameSpeed) {
+        this.x -= this.speed * gameSpeed * dt/16.6;
+      }
+      get rect() {
+        return {x:this.x, y:this.y, w:this.w, h:this.h};
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.shadowColor = "#4444"; ctx.shadowBlur = 2;
+        ctx.fillStyle = this.color;
+        // Draw different shapes for obstacles
+        switch(this.type.name) {
+          case "rock":
+            ctx.beginPath();
+            ctx.ellipse(this.w/2, this.h*0.84, this.w/2, this.h/2, -0.3, 0, 2*Math.PI);
+            ctx.fill();
+            break;
+          case "log":
+            ctx.beginPath();
+            ctx.rect(0, this.h*0.68, this.w, this.h*0.28);
+            ctx.arc(this.w/2, this.h*0.68, this.w/2, Math.PI, 2*Math.PI);
+            ctx.fill();
+            break;
+          case "bush":
+            ctx.beginPath();
+            ctx.arc(this.w/2, this.h*0.7, this.w/3, Math.PI, 2*Math.PI);
+            ctx.arc(this.w/3, this.h*0.7, this.w/4, Math.PI, 2*Math.PI);
+            ctx.arc(this.w*0.68, this.h*0.7, this.w/5, Math.PI, 2*Math.PI);
+            ctx.fill();
+            break;
+          case "puddle":
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.ellipse(this.w/2, this.h*0.8, this.w/2, this.h/3, 0, 0, 2*Math.PI);
+            ctx.fill();
+            break;
+          case "crate":
+            ctx.globalAlpha = 0.95;
+            ctx.beginPath();
+            ctx.rect(0, this.h*0.62, this.w, this.h*0.38);
+            ctx.strokeStyle = "#b08938"; ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fill();
+            break;
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+      }
+    }
+
+    class Reward {
+      constructor(type) {
+        this.type = type;
+        this.x = GAME_W + 20;
+        this.y = GROUND_Y - PEAR_H - 30 - Math.random()*80;
+        this.collected = false;
+        this.w = REWARD_SIZE;
+        this.h = REWARD_SIZE;
+        this.speed = 1.0;
+      }
+      update(dt, gameSpeed) {
+        this.x -= this.speed * gameSpeed * dt/16.7;
+      }
+      get rect() {
+        return {x:this.x, y:this.y, w:this.w, h:this.h};
+      }
+      draw(ctx, t) {
+        ctx.save();
+        ctx.translate(this.x+this.w/2, this.y+this.h/2);
+        ctx.scale(1.06 + Math.sin(t/140)*0.08, 1.06 + Math.cos(t/180)*0.08);
+
+        if (this.type.type === 'star') {
+          // Draw a star
+          ctx.rotate((Math.sin(t/200)+1)*0.08);
+          ctx.beginPath();
+          for(let i=0;i<5;i++){
+            ctx.lineTo(
+              Math.cos((18+i*72-90)/180*Math.PI)*10,
+              Math.sin((18+i*72-90)/180*Math.PI)*10
+            );
+            ctx.lineTo(
+              Math.cos((54+i*72-90)/180*Math.PI)*4,
+              Math.sin((54+i*72-90)/180*Math.PI)*4
+            );
+          }
+          ctx.closePath();
+          ctx.fillStyle = this.type.color;
+          ctx.shadowColor = "#ffd700";
+          ctx.shadowBlur = 7;
+          ctx.fill();
+        } else if (this.type.type === 'cherry') {
+          // Cherries
+          ctx.beginPath();
+          ctx.arc(-5,0,7,0,2*Math.PI);
+          ctx.arc(7,0,7,0,2*Math.PI);
+          ctx.fillStyle = this.type.color;
+          ctx.shadowColor = "#c44";
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(-5,-6);
+          ctx.bezierCurveTo(-7,-16,7,-18,7,-5);
+          ctx.strokeStyle="#5e8e41";ctx.lineWidth=2;ctx.stroke();
+        } else if (this.type.type === 'blueberry') {
+          // Blueberry
+          ctx.beginPath();
+          ctx.arc(0,0,12,0,2*Math.PI);
+          ctx.fillStyle = this.type.color;
+          ctx.shadowColor = "#4b70dd";
+          ctx.shadowBlur = 7;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(-4,-3,2,0,2*Math.PI);
+          ctx.fillStyle="#fff5";
+          ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
+
+    // ====== GAME ENGINE ======
+    let game = {
+      started: false,
+      over: false,
+      paused: false,
+      speed: INITIAL_SPEED,
+      pear: null,
+      obstacles: [],
+      rewards: [],
+      lastObstacle: 0,
+      nextObstacle: 0,
+      lastReward: 0,
+      nextReward: 0,
+      score: 0,
+      highscore: 0,
+      stats: {jumps:0, avoided:0, collected:0},
+      t: 0,
+      difficulty: 1,
+      invincible: false,
+      boost: false,
+    };
+
+    // ====== UI HANDLERS ======
+    let uiOverlay = document.getElementById('ui-overlay');
+    let scoreElem = document.getElementById('score');
+    let highscoreElem = document.getElementById('highscore');
+    let statsElem = document.getElementById('stats');
+    let restartScreen = document.getElementById('restart-screen');
+    let finalScoreElem = document.getElementById('final-score');
+    let finalStatsElem = document.getElementById('final-stats');
+    let restartBtn = document.getElementById('restart-btn');
+
+    // Load highscore
+    function loadHighscore() {
+      let hs = localStorage.getItem('rarepear_highscore');
+      if (hs) game.highscore = parseInt(hs,10);
+      highscoreElem.textContent = 'High: '+game.highscore;
+    }
+    function saveHighscore() {
+      if (game.score > game.highscore) {
+        game.highscore = game.score;
+        localStorage.setItem('rarepear_highscore', game.highscore);
+      }
+    }
+
+    // ====== GAME LOGIC ======
+    function startGame() {
+      // Reset all game state
+      game.started = true;
+      game.over = false;
+      game.speed = INITIAL_SPEED;
+      game.difficulty = 1;
+      game.score = 0;
+      game.obstacles = [];
+      game.rewards = [];
+      game.lastObstacle = 0;
+      game.nextObstacle = 500;
+      game.lastReward = 0;
+      game.nextReward = 1200+Math.random()*1600;
+      game.pear = new Pear(pearCustom);
+      game.stats = {jumps:0, avoided:0, collected:0};
+      uiOverlay.style.display = '';
+      restartScreen.style.display = 'none';
+      updateStats();
+    }
+
+    function gameOver() {
+      game.over = true;
+      saveHighscore();
+      showRestartScreen();
+    }
+
+    function showRestartScreen() {
+      finalScoreElem.textContent = `Score: ${game.score}`;
+      finalStatsElem.innerHTML = `
+        Jumps: <b>${game.pear.stats.jumps}</b><br>
+        Obstacles Avoided: <b>${game.pear.stats.avoided}</b><br>
+        Rewards Collected: <b>${game.pear.stats.collected}</b><br>
+        High Score: <b>${game.highscore}</b>
+      `;
+      restartScreen.style.display = '';
+      uiOverlay.style.display = 'none';
+    }
+
+    function updateStats() {
+      scoreElem.textContent = `Score: ${game.score}`;
+      highscoreElem.textContent = `High: ${game.highscore}`;
+      statsElem.textContent =
+        `Jumps: ${game.pear?.stats.jumps||0} | Avoided: ${game.pear?.stats.avoided||0} | Rewards: ${game.pear?.stats.collected||0}`;
+    }
+
+    // ====== GAME LOOP ======
+    let lastTime = 0;
+    function loop(time) {
+      if (!game.started || game.over) {
+        drawStartScreen();
+        requestAnimationFrame(loop);
+        return;
+      }
+      let dt = Math.min(40, time-lastTime || 16.7);
+      lastTime = time;
+      game.t += dt;
+
+      // Difficulty scaling
+      game.difficulty = 1 + Math.floor(game.t/4100);
+      let speedScale = 1 + game.difficulty*0.12 + (game.pear.speedBoost>0?0.5:0);
+
+      // Update Pear
+      game.pear.update(dt);
+
+      // Obstacles
+      game.lastObstacle += dt;
+      if (game.lastObstacle > game.nextObstacle) {
+        let type = OBSTACLE_TYPES[Math.floor(Math.random()*OBSTACLE_TYPES.length)];
+        game.obstacles.push(new Obstacle(type, game.speed));
+        game.lastObstacle = 0;
+        game.nextObstacle = OBSTACLE_MIN_GAP + Math.random()*(OBSTACLE_MAX_GAP-OBSTACLE_MIN_GAP) - game.difficulty*7;
+        if (game.nextObstacle < 60) game.nextObstacle = 60;
+      }
+      // Update Obstacles
+      for(let i=game.obstacles.length-1; i>=0; i--) {
+        let obs = game.obstacles[i];
+        obs.update(dt, speedScale);
+        // Remove offscreen
+        if (obs.x + obs.w < 0) {
+          game.obstacles.splice(i,1);
+          if (!obs.passed) {
+            game.pear.stats.avoided++;
+          }
+        } else if (!obs.passed && obs.x + obs.w < game.pear.x) {
+          obs.passed = true;
+          game.pear.stats.avoided++;
+        }
+      }
+
+      // Rewards
+      game.lastReward += dt;
+      if (game.lastReward > game.nextReward) {
+        let type = REWARDS[Math.floor(Math.random()*REWARDS.length)];
+        game.rewards.push(new Reward(type));
+        game.lastReward = 0;
+        game.nextReward = 1600 + Math.random()*2300 - game.difficulty*19;
+        if (game.nextReward < 700) game.nextReward = 700;
+      }
+      // Update Rewards
+      for(let i=game.rewards.length-1; i>=0; i--) {
+        let r = game.rewards[i];
+        r.update(dt, speedScale);
+        if (r.x + r.w < 0) {
+          game.rewards.splice(i,1);
+        }
+      }
+
+      // Check collisions: Obstacles
+      if (game.pear.invincible <= 0) {
+        for (let obs of game.obstacles) {
+          if (rectsOverlap(game.pear.rect, obs.rect)) {
+            gameOver();
+            return;
+          }
+        }
+      }
+
+      // Check collisions: Rewards
+      for (let i=game.rewards.length-1; i>=0; i--) {
+        let r = game.rewards[i];
+        if (!r.collected && rectsOverlap(game.pear.rect, r.rect)) {
+          r.collected = true;
+          game.pear.stats.collected++;
+          applyReward(r.type.effect);
+          game.rewards.splice(i,1);
+        }
+      }
+
+      // Score
+      if (!game.over) {
+        game.score += 1 + Math.floor(game.difficulty/3);
+        updateStats();
+        saveHighscore();
+      }
+
+      // Draw
+      drawGame(ctx, game, time);
+
+      requestAnimationFrame(loop);
+    }
+
+    // ====== DRAW GAME ======
+    function drawGame(ctx, game, t) {
+      // Clear
+      ctx.clearRect(0,0,GAME_W,GAME_H);
+
+      // Animated background: scrolling hills and clouds
+      drawBackground(ctx, t, game.difficulty);
+
+      // Draw obstacles
+      for (let obs of game.obstacles) obs.draw(ctx);
+
+      // Draw rewards
+      for (let r of game.rewards) r.draw(ctx, t);
+
+      // Draw ground
+      ctx.save();
+      ctx.fillStyle = "#b0e57c";
+      ctx.fillRect(0, GROUND_Y, GAME_W, GAME_H-GROUND_Y);
+      ctx.restore();
+
+      // Draw pear
+      game.pear.draw(ctx, t);
+
+      // If invincible, flash
+      if (game.pear.invincible>0 && Math.floor(t/120)%2===0) {
+        ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.fillStyle = "#fff7a4";
+        ctx.fillRect(0,0,GAME_W,GAME_H);
+        ctx.restore();
+      }
+    }
+
+    function drawBackground(ctx, t, difficulty) {
+      // Clouds
+      for(let i=0;i<3;i++){
+        let x = ((t/16) * (0.22+i*0.05+difficulty*0.01)) % (GAME_W+220) - 110;
+        let y = 40 + i*24 + Math.sin(t/500 + i)*7;
+        ctx.save();
+        ctx.globalAlpha = 0.19 + i*0.07;
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.ellipse(x, y, 52-12*i, 26-7*i, 0, 0, 2*Math.PI);
+        ctx.ellipse(x+24, y+2, 22-4*i, 12-2*i, 0, 0, 2*Math.PI);
+        ctx.ellipse(x-27, y+3, 18-4*i, 8-2*i, 0, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+      // Distant hills
+      for(let i=0;i<2;i++){
+        let xoff = ((t/22) * (0.3+i*0.1+difficulty*0.02)) % (GAME_W+400) - 200;
+        ctx.save();
+        ctx.globalAlpha = 0.13 + i*0.08;
+        ctx.fillStyle = i===0?"#9adf7e":"#b4e9b2";
+        ctx.beginPath();
+        ctx.ellipse(xoff+320, GAME_H-70-18*i, 220-40*i, 38-8*i, 0, 0, 2*Math.PI);
+        ctx.ellipse(xoff+160, GAME_H-60-16*i, 90-16*i, 20-3*i, 0, 0, 2*Math.PI);
+        ctx.ellipse(xoff+470, GAME_H-60-14*i, 100-14*i, 16-3*i, 0, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+      // Moving ground lines
+      let baseY = GROUND_Y+8;
+      ctx.save();
+      ctx.strokeStyle="#bde199";
+      ctx.globalAlpha = 0.58;
+      ctx.lineWidth=2.5;
+      for(let i=0;i<6;i++){
+        let x = ((t/5) * (1.1+i*0.17+difficulty*0.04)) % (GAME_W+200) - 100;
+        ctx.beginPath();
+        ctx.moveTo(x, baseY+6*i);
+        ctx.lineTo(x+60, baseY+6*i);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Check rectangle overlap
+    function rectsOverlap(a, b) {
+      return a.x < b.x + b.w &&
+             a.x + a.w > b.x &&
+             a.y < b.y + b.h &&
+             a.y + a.h > b.y;
+    }
+
+    // Apply reward effect
+    function applyReward(effect) {
+      switch(effect) {
+        case 'invincible':
+          game.pear.invincible = INVINCIBLE_TIME;
+          break;
+        case 'speed':
+          game.pear.speedBoost = SPEEDBOOST_TIME;
+          break;
+        case 'score':
+          game.score += 380;
+          break;
+      }
+    }
+
+    // ====== INPUT HANDLING ======
+    function jumpOrStart(e) {
+      if (!game.started || game.over) return;
+      game.pear.jump();
+      e?.preventDefault();
+    }
+    function slide(e) {
+      if (!game.started || game.over) return;
+      game.pear.slide();
+      e?.preventDefault();
+    }
+
+    // Keyboard controls
+    window.addEventListener('keydown', e=>{
+      if (!game.started) return;
+      if (game.over) return;
+      if (e.code==='Space' || e.key===' ' || e.key==='ArrowUp') {
+        jumpOrStart(e);
+      }
+      if (e.code==='ArrowDown') {
+        slide(e);
+      }
+    });
+    // Touch controls
+    let touchStartY = null, touchMoved = false;
+    canvas.addEventListener('touchstart', e=>{
+      if (!game.started) return;
+      if (game.over) return;
+      if (e.touches.length==1) {
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }
+    },{passive:false});
+    canvas.addEventListener('touchmove', e=>{
+      if (!game.started) return;
+      if (game.over) return;
+      if (touchStartY!=null) {
+        let dy = e.touches[0].clientY - touchStartY;
+        if (dy > 40) { slide(e); touchMoved=true;}
+      }
+    },{passive:false});
+    canvas.addEventListener('touchend', e=>{
+      if (!game.started) return;
+      if (game.over) return;
+      if (!touchMoved) { jumpOrStart(e);}
+      touchStartY = null;
+    },{passive:false});
+    // Mouse click (jump)
+    canvas.addEventListener('mousedown', e=>{
+      if (!game.started) return;
+      if (game.over) return;
+      jumpOrStart(e);
+    });
+    // For mobile, prevent scrolling in container
+    document.getElementById('game-container').addEventListener('touchmove', e=>e.preventDefault(), {passive:false});
+
+    // ====== GAME START/RESTART FLOW ======
+    // Customization panel
+    let customPanel = document.getElementById('custom-panel');
+    let pearColorInput = document.getElementById('pearColor');
+    let leafColorInput = document.getElementById('leafColor');
+    let pearShapeInput = document.getElementById('pearShape');
+    let pearPreview = document.getElementById('pearPreview');
+
+    function updatePearPreview() {
+      drawPearPreview(pearPreview, {
+        color: pearColorInput.value,
+        leaf: leafColorInput.value,
+        shape: pearShapeInput.value
+      });
+    }
+    pearColorInput.addEventListener('input', updatePearPreview);
+    leafColorInput.addEventListener('input', updatePearPreview);
+    pearShapeInput.addEventListener('change', updatePearPreview);
+
+    updatePearPreview();
+
+    customPanel.addEventListener('submit', e=>{
+      e.preventDefault();
+      pearCustom = {
+        color: pearColorInput.value,
+        leaf: leafColorInput.value,
+        shape: pearShapeInput.value
+      };
+      customPanel.style.display = 'none';
+      loadHighscore();
+      resizeCanvas();
+      setTimeout(()=>{
+        window.focus(); // For keyboard
+        startGame();
+        requestAnimationFrame(loop);
+      },50);
+    });
+
+    // Start game on click/tap if not started
+    canvas.addEventListener('mousedown', ()=>{
+      if (!game.started && customPanel.style.display==='none') {
+        startGame();
+        requestAnimationFrame(loop);
+      }
+    });
+    canvas.addEventListener('touchstart', ()=>{
+      if (!game.started && customPanel.style.display==='none') {
+        startGame();
+        requestAnimationFrame(loop);
+      }
+    });
+
+    // Restart button
+    restartBtn.addEventListener('click', ()=>{
+      restartScreen.style.display = 'none';
+      startGame();
+      requestAnimationFrame(loop);
+    });
+
+    // ====== DRAW START SCREEN ======
+    function drawStartScreen() {
+      ctx.clearRect(0,0,GAME_W,GAME_H);
+      drawBackground(ctx, performance.now(), 1);
+      // Draw pear in idle mode
+      let tmpPear = new Pear(pearCustom);
+      tmpPear.x = GAME_W/2-24;
+      tmpPear.y = GROUND_Y - PEAR_H;
+      tmpPear.draw(ctx, performance.now());
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 2em Segoe UI, Arial,sans-serif';
+      ctx.fillStyle = '#44852e';
+      ctx.globalAlpha = 0.94;
+      ctx.fillText('Pear Runner', GAME_W/2, GROUND_Y-80);
+      ctx.font = '1.1em Segoe UI, Arial,sans-serif';
+      ctx.globalAlpha = 0.82;
+      ctx.fillText('Tap, click, or press space to start', GAME_W/2, GROUND_Y-52);
+      ctx.font = '0.98em Segoe UI, Arial,sans-serif';
+      ctx.globalAlpha = 0.6;
+      ctx.fillText('Jump: Space / Tap / Click', GAME_W/2, GROUND_Y-23);
+      ctx.fillText('Slide: Down Arrow / Swipe down', GAME_W/2, GROUND_Y-8);
+      ctx.restore();
+    }
+
+    // ====== INIT ======
+    function init() {
+      resizeCanvas();
+      uiOverlay.style.display = 'none';
+      customPanel.style.display = '';
+      restartScreen.style.display = 'none';
+      drawStartScreen();
+    }
+    window.onload = init;
+  </script>
 </body>
 </html>
